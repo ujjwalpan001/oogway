@@ -1,0 +1,69 @@
+.model-badge-wrap {
+  position: relative;
+  display: inline-flex;
+}
+
+.model-badge-wrap:hover .health-tooltip {
+  opacity: 1;
+  pointer-events: all;
+  transform: translateY(0);
+}
+
+.status-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  display: inline-block;
+  flex-shrink: 0;
+}
+
+.dot-online {
+  background: var(--accent-green);
+  box-shadow: 0 0 6px rgba(16, 185, 129, 0.6);
+  animation: pulse 2s ease infinite;
+}
+
+.dot-offline {
+  background: var(--accent-red);
+}
+
+.health-tooltip {
+  position: absolute;
+  top: calc(100% + 8px);
+  right: 0;
+  background: var(--bg-elevated);
+  border: 1px solid var(--surface-border);
+  border-radius: var(--radius-md);
+  padding: 10px 12px;
+  min-width: 200px;
+  opacity: 0;
+  pointer-events: none;
+  transform: translateY(-4px);
+  transition: all var(--transition-base);
+  box-shadow: var(--shadow-md);
+  z-index: 100;
+}
+
+.health-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 11px;
+  color: var(--text-secondary);
+  padding: 3px 0;
+}
+
+.check-ok { color: var(--accent-green); font-weight: 600; }
+.check-err { color: var(--accent-red); font-weight: 600; }
+
+.health-divider {
+  height: 1px;
+  background: var(--surface-border);
+  margin: 6px 0;
+}
+
+.health-chromadb-detail {
+  font-size: 10px;
+  color: var(--text-muted);
+  font-family: var(--font-mono);
+}
