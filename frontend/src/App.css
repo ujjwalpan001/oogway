@@ -13,6 +13,9 @@
 .header-left {
   flex: 1;
   min-width: 0;
+  display: flex;
+  align-items: center;
+  gap: 12px;
 }
 
 .header-session-label {
@@ -38,4 +41,22 @@
   flex-direction: column;
   min-width: 0;
   overflow: hidden;
+}
+
+.sidebar-toggle-btn, .theme-toggle-btn {
+  background: transparent;
+  color: var(--text-secondary);
+  border: none;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 6px;
+  border-radius: var(--radius-sm);
+  transition: all var(--transition-fast);
+}
+
+.sidebar-toggle-btn:hover, .theme-toggle-btn:hover {
+  background: var(--surface-glass-hover);
+  color: var(--text-primary);
 }
