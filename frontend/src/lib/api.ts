@@ -37,6 +37,14 @@ export interface SessionWithMessages extends SessionOut {
   messages: MessageOut[]
 }
 
+export interface UserData {
+  id: string
+  email: string
+  session_token?: string
+  claude_api_key?: string
+  openai_api_key?: string
+}
+
 export interface HealthData {
   status: string
   version: string
@@ -45,9 +53,22 @@ export interface HealthData {
   checks: Record<string, string>
 }
 
+let currentSessionToken: string | null = localStorage.getItem('session_token')
+
+export function setSessionToken(token: string | null) {
+  currentSessionToken = token
+  if (token) localStorage.setItem('session_token', token)
+  else localStorage.removeItem('session_token')
+}
+
 async function request<T>(path: string, options?: RequestInit): Promise<T> {
+  const headers: Record<string, string> = { 'Content-Type': 'application/json' }
+  if (currentSessionToken) {
+    headers['Authorization'] = `Bearer ${currentSessionToken}`
+  }
+  
   const res = await fetch(`${API_BASE}${path}`, {
-    headers: { 'Content-Type': 'application/json' },
+    headers: { ...headers, ...options?.headers },
     ...options,
   })
   if (!res.ok) {
@@ -58,6 +79,13 @@ async function request<T>(path: string, options?: RequestInit): Promise<T> {
 }
 
 export const api = {
+  login: (data: any) => request<UserData>('/auth/login', { method: 'POST', body: JSON.stringify(data) }),
+  register: (data: any) => request<UserData>('/auth/register', { method: 'POST', body: JSON.stringify(data) }),
+  logout: () => request('/auth/logout', { method: 'POST' }),
+  getMe: () => request<UserData>('/auth/me'),
+  updateSettings: (data: any) => request<UserData>('/auth/settings', { method: 'PUT', body: JSON.stringify(data) }),
+
+
   createSession: (title = 'New conversation') =>
     request<SessionOut>('/sessions', {
       method: 'POST',
@@ -83,10 +111,15 @@ export const api = {
     onSkillStart: (skill: string) => void,
   ): () => void {
     const controller = new AbortController()
+    
+    const headers: Record<string, string> = { 'Content-Type': 'application/json' }
+    if (currentSessionToken) {
+      headers['Authorization'] = `Bearer ${currentSessionToken}`
+    }
 
     fetch(`${API_BASE}/chat/stream`, {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers,
       body: JSON.stringify({ session_id: sessionId, message, skill }),
       signal: controller.signal,
     }).then(async (res) => {

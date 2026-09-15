@@ -1,0 +1,168 @@
+.settings-backdrop {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background-color: rgba(0, 0, 0, 0.7);
+  backdrop-filter: blur(5px);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+}
+
+.settings-modal {
+  background-color: #1a1a24;
+  border: 1px solid #2a2a36;
+  border-radius: 12px;
+  width: 100%;
+  max-width: 500px;
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+  color: #fff;
+  overflow: hidden;
+  animation: modalFadeIn 0.2s ease-out;
+}
+
+@keyframes modalFadeIn {
+  from { opacity: 0; transform: translateY(20px) scale(0.95); }
+  to { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+.settings-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1.5rem 2rem;
+  border-bottom: 1px solid #2a2a36;
+}
+
+.settings-header h2 {
+  margin: 0;
+  font-size: 1.25rem;
+  font-weight: 600;
+}
+
+.close-btn {
+  background: none;
+  border: none;
+  color: #8b8b9c;
+  font-size: 1.5rem;
+  cursor: pointer;
+  transition: color 0.2s;
+}
+
+.close-btn:hover {
+  color: #fff;
+}
+
+.settings-form {
+  padding: 2rem;
+}
+
+.settings-section {
+  margin-bottom: 2rem;
+}
+
+.settings-section h3 {
+  margin: 0 0 0.5rem 0;
+  font-size: 1.1rem;
+}
+
+.settings-desc {
+  color: #8b8b9c;
+  font-size: 0.9rem;
+  margin-bottom: 1.5rem;
+}
+
+.settings-group {
+  margin-bottom: 1.5rem;
+}
+
+.settings-group label {
+  display: block;
+  margin-bottom: 0.5rem;
+  font-weight: 500;
+  font-size: 0.9rem;
+}
+
+.settings-group input {
+  width: 100%;
+  background-color: #111115;
+  border: 1px solid #3f3f50;
+  color: white;
+  padding: 0.75rem 1rem;
+  border-radius: 6px;
+  font-size: 0.95rem;
+  box-sizing: border-box;
+  transition: border-color 0.2s;
+}
+
+.settings-group input:focus {
+  outline: none;
+  border-color: #8B5CF6;
+}
+
+.help-text {
+  display: block;
+  margin-top: 0.4rem;
+  color: #6b6b7a;
+  font-size: 0.8rem;
+}
+
+.settings-footer {
+  display: flex;
+  justify-content: flex-end;
+  gap: 1rem;
+  padding-top: 1rem;
+  border-top: 1px solid #2a2a36;
+}
+
+.btn-cancel {
+  background: transparent;
+  border: 1px solid #3f3f50;
+  color: #fff;
+  padding: 0.75rem 1.5rem;
+  border-radius: 6px;
+  cursor: pointer;
+  font-weight: 500;
+  transition: background-color 0.2s;
+}
+
+.btn-cancel:hover {
+  background-color: #2a2a36;
+}
+
+.btn-save {
+  background: linear-gradient(135deg, #A78BFA 0%, #8B5CF6 100%);
+  border: none;
+  color: #fff;
+  padding: 0.75rem 1.5rem;
+  border-radius: 6px;
+  cursor: pointer;
+  font-weight: 500;
+  transition: transform 0.1s, box-shadow 0.2s;
+}
+
+.btn-save:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(139, 92, 246, 0.3);
+}
+
+.settings-message {
+  padding: 0.75rem;
+  border-radius: 6px;
+  margin-bottom: 1.5rem;
+  font-size: 0.9rem;
+  text-align: center;
+}
+
+.settings-message.success {
+  background: rgba(16, 185, 129, 0.1);
+  color: #10B981;
+}
+
+.settings-message.error {
+  background: rgba(239, 68, 68, 0.1);
+  color: #ef4444;
+}
