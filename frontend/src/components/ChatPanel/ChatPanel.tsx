@@ -6,6 +6,7 @@ import './ChatPanel.css'
 
 interface Props {
   messages: ChatMessage[]
+  isLoadingHistory?: boolean
   onArtifactOpen: (artifact: ArtifactData) => void
   onSendMessage: (text: string, skill: string | null) => void
 }
@@ -17,12 +18,24 @@ const SUGGESTED_QUESTIONS = [
   "What growth loops work for B2B SaaS?",
 ]
 
-export function ChatPanel({ messages, onArtifactOpen, onSendMessage }: Props) {
+export function ChatPanel({ messages, isLoadingHistory, onArtifactOpen, onSendMessage }: Props) {
   const bottomRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
     bottomRef.current?.scrollIntoView({ behavior: 'smooth' })
   }, [messages])
+
+  if (isLoadingHistory) {
+    return (
+      <div className="chat-panel" style={{ display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
+        <div className="chat-loading-spinner" style={{
+          width: '32px', height: '32px', border: '3px solid var(--surface-glass-hover)', 
+          borderTopColor: 'var(--accent-primary)', borderRadius: '50%', animation: 'spin 1s linear infinite'
+        }} />
+        <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
+      </div>
+    )
+  }
 
   const isEmpty = messages.length === 0
 

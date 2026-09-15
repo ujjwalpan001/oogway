@@ -17,9 +17,11 @@ export interface ChatMessage {
 export function useChat(sessionId: string | null) {
   const [messages, setMessages] = useState<ChatMessage[]>([])
   const [isLoading, setIsLoading] = useState(false)
+  const [isHistoryLoading, setIsHistoryLoading] = useState(false)
   const abortRef = useRef<(() => void) | null>(null)
 
   const loadHistory = useCallback(async (sid: string) => {
+    setIsHistoryLoading(true)
     try {
       const session = await api.getSession(sid)
       const msgs: ChatMessage[] = session.messages.map((m) => ({
@@ -27,17 +29,24 @@ export function useChat(sessionId: string | null) {
         role: m.role,
         content: m.content,
         citations: m.citations,
-        artifact: m.artifact,
+        artifact: m.artifact ? {
+          type: (m.artifact as any).artifact_type || m.artifact.type,
+          title: m.artifact.title,
+          content: m.artifact.content,
+        } : null,
       }))
       setMessages(msgs)
     } catch {
       setMessages([])
+    } finally {
+      setIsHistoryLoading(false)
     }
   }, [])
 
   const sendMessage = useCallback(
-    async (text: string, skill: string | null = null) => {
-      if (!sessionId || isLoading) return null
+    async (text: string, skill: string | null = null, explicitSessionId: string | null = null) => {
+      const targetSessionId = explicitSessionId || sessionId
+      if (!targetSessionId || isLoading) return null
 
       const userMsgId = `user-${Date.now()}`
       const asstMsgId = `asst-${Date.now()}`
@@ -52,7 +61,7 @@ export function useChat(sessionId: string | null) {
       let artifactOut: ArtifactData | null = null
 
       const abort = api.streamChat(
-        sessionId,
+        targetSessionId,
         text,
         skill,
         (token) => {
@@ -108,5 +117,5 @@ export function useChat(sessionId: string | null) {
     setMessages([])
   }, [])
 
-  return { messages, isLoading, sendMessage, loadHistory, cancelStream, clearMessages }
+  return { messages, isLoading, isHistoryLoading, sendMessage, loadHistory, cancelStream, clearMessages }
 }

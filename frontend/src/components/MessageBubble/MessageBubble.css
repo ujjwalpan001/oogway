@@ -41,8 +41,8 @@
 }
 
 .user-bubble {
-  background: var(--accent-primary);
-  color: white;
+  background: var(--text-primary);
+  color: var(--text-inverse);
   border-bottom-right-radius: var(--radius-sm);
   word-break: break-word;
 }
@@ -111,11 +111,12 @@
 
 .markdown-body code {
   font-family: var(--font-mono);
-  background: var(--bg-tertiary);
+  background: var(--surface-glass);
   padding: 2px 6px;
   border-radius: 4px;
   font-size: 13px;
-  color: #a78bfa;
+  color: var(--text-primary);
+  border: 1px solid var(--surface-border);
 }
 
 .markdown-body pre {
@@ -130,6 +131,7 @@
 .markdown-body pre code {
   background: none;
   padding: 0;
+  border: none;
   color: var(--text-secondary);
 }
 

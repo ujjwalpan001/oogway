@@ -2,6 +2,8 @@ import { useState, useRef, useCallback } from 'react'
 import './ChatInput.css'
 
 interface Props {
+  selectedSkill: string | null
+  onSkillChange: (skill: string | null) => void
   onSend: (text: string, skill: string | null) => void
   onCancel: () => void
   isLoading: boolean
@@ -15,10 +17,10 @@ const SKILL_OPTIONS = [
   { id: 'artifact:html', label: 'HTML Report', icon: '🌐' },
 ]
 
-export function ChatInput({ onSend, onCancel, isLoading, disabled }: Props) {
+export function ChatInput({ selectedSkill, onSkillChange, onSend, onCancel, isLoading, disabled }: Props) {
   const [value, setValue] = useState('')
-  const [selectedSkill, setSelectedSkill] = useState<string | null>(null)
   const textareaRef = useRef<HTMLTextAreaElement>(null)
+  const isSubmittingRef = useRef(false)
 
   const adjustHeight = useCallback(() => {
     const el = textareaRef.current
@@ -29,12 +31,16 @@ export function ChatInput({ onSend, onCancel, isLoading, disabled }: Props) {
 
   const handleSubmit = () => {
     const text = value.trim()
-    if (!text || isLoading || disabled) return
+    if (!text || isLoading || disabled || isSubmittingRef.current) return
+    isSubmittingRef.current = true
     onSend(text, selectedSkill)
     setValue('')
     if (textareaRef.current) {
       textareaRef.current.style.height = 'auto'
     }
+    setTimeout(() => {
+      isSubmittingRef.current = false
+    }, 500)
   }
 
   const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
@@ -51,7 +57,7 @@ export function ChatInput({ onSend, onCancel, isLoading, disabled }: Props) {
           <button
             key={String(opt.id)}
             className={`skill-option ${selectedSkill === opt.id ? 'skill-option-active' : ''}`}
-            onClick={() => setSelectedSkill(opt.id)}
+            onClick={() => onSkillChange(opt.id)}
           >
             <span>{opt.icon}</span>
             <span>{opt.label}</span>
