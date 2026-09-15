@@ -1,5 +1,6 @@
 from app.agent.router import get_agent
 from app.logging_config import get_logger
+from app.models import User
 
 logger = get_logger(__name__)
 
@@ -16,8 +17,8 @@ Rules:
 Generate high-quality, professional output. If the user asked for a framework, roadmap, comparison table, or report — structure it visually."""
 
 
-async def run_artifact_skill(request: str, artifact_type: str, context: str) -> tuple[str, str]:
-    agent = get_agent()
+async def run_artifact_skill(user: User, request: str, artifact_type: str, context: str) -> tuple[str, str]:
+    agent = get_agent(user)
     type_hint = "an HTML document" if artifact_type == "html" else "a Markdown document"
     messages = [
         {

@@ -1,5 +1,6 @@
 from app.agent.router import get_agent
 from app.logging_config import get_logger
+from app.models import User
 
 logger = get_logger(__name__)
 
@@ -22,8 +23,8 @@ Ship 30 for 30 writing principles you must follow:
 Do not add any preamble. Start directly with the title, then the essay."""
 
 
-async def run_ship30_skill(topic: str, context: str) -> str:
-    agent = get_agent()
+async def run_ship30_skill(user: User, topic: str, context: str) -> str:
+    agent = get_agent(user)
     messages = [
         {
             "role": "user",
