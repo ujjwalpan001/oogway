@@ -6,9 +6,11 @@ interface Props {
   activeSessionId: string | null
   onSelectSession: (id: string) => void
   onNewSession: () => void
+  isOpen: boolean
+  onClose: () => void
 }
 
-export function SessionSidebar({ activeSessionId, onSelectSession, onNewSession }: Props) {
+export function SessionSidebar({ activeSessionId, onSelectSession, onNewSession, isOpen, onClose }: Props) {
   const [sessions, setSessions] = useState<SessionOut[]>([])
   const [loading, setLoading] = useState(true)
 
@@ -47,7 +49,9 @@ export function SessionSidebar({ activeSessionId, onSelectSession, onNewSession 
   }
 
   return (
-    <aside className="session-sidebar">
+    <>
+      <div className={`sidebar-overlay ${isOpen ? 'open' : ''}`} onClick={onClose} />
+      <aside className={`session-sidebar ${isOpen ? 'open' : ''}`}>
       <div className="sidebar-header">
         <div className="sidebar-brand">
           <svg width="22" height="22" viewBox="0 0 40 40" fill="none">
@@ -56,8 +60,8 @@ export function SessionSidebar({ activeSessionId, onSelectSession, onNewSession 
             <circle cx="20" cy="20" r="3" fill="white" />
             <defs>
               <linearGradient id="sb-grad" x1="0" y1="0" x2="40" y2="40">
-                <stop offset="0%" stopColor="#7c6df0" />
-                <stop offset="100%" stopColor="#4f46e5" />
+                <stop offset="0%" stopColor="var(--text-primary)" />
+                <stop offset="100%" stopColor="var(--text-muted)" />
               </linearGradient>
             </defs>
           </svg>
@@ -127,5 +131,6 @@ export function SessionSidebar({ activeSessionId, onSelectSession, onNewSession 
         </div>
       </div>
     </aside>
+    </>
   )
 }
