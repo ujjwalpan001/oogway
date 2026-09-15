@@ -10,6 +10,8 @@ class Base(DeclarativeBase):
     pass
 
 
+import ssl
+
 engine_kwargs = {
     "echo": False,
 }
