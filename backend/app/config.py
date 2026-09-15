@@ -6,7 +6,7 @@ class Settings(BaseSettings):
     llm_provider: Literal["groq", "ollama"] = "groq"
 
     groq_api_key: str = ""
-    groq_model: str = "llama3-70b-8192"
+    groq_model: str = "qwen/qwen3.8-27b"
 
     ollama_base_url: str = "http://localhost:11434"
     ollama_model: str = "llama3.2:3b"
@@ -14,7 +14,7 @@ class Settings(BaseSettings):
     database_url: str = "postgresql+asyncpg://lenny:lenny@localhost:5432/lenny"
 
     chroma_persist_dir: str = "./chroma_db"
-    transcripts_dir: str = "../data/transcripts"
+    transcripts_dir: str = "../data/transcripts/episodes"
 
     embedding_model: str = "all-MiniLM-L6-v2"
     retrieval_top_k: int = 5
@@ -28,7 +28,7 @@ class Settings(BaseSettings):
     app_version: str = "1.0.0"
 
     class Config:
-        env_file = ".env"
+        env_file = "../.env"
         env_file_encoding = "utf-8"
 
 

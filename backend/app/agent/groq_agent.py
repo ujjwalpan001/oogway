@@ -15,16 +15,17 @@ class GroqAgent(BaseAgent):
     async def stream(self, messages: list[dict], system: str) -> AsyncIterator[str]:
         full_messages = [{"role": "system", "content": system}] + messages
         try:
-            async with self.client.chat.completions.stream(
+            stream = await self.client.chat.completions.create(
                 model=self.model,
                 messages=full_messages,
                 max_tokens=4096,
                 temperature=0.7,
-            ) as stream:
-                async for chunk in stream:
-                    delta = chunk.choices[0].delta.content
-                    if delta:
-                        yield delta
+                stream=True,
+            )
+            async for chunk in stream:
+                delta = chunk.choices[0].delta.content
+                if delta:
+                    yield delta
         except Exception as exc:
             logger.error("groq_stream_failed", model=self.model, error=str(exc))
             raise

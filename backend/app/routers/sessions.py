@@ -40,8 +40,12 @@ async def get_session(session_id: str, db: AsyncSession = Depends(get_db)):
     if not session:
         raise HTTPException(status_code=404, detail="Session not found")
 
+    from sqlalchemy.orm import selectinload
     msg_result = await db.execute(
-        select(Message).where(Message.session_id == session_id).order_by(Message.created_at)
+        select(Message)
+        .options(selectinload(Message.artifact), selectinload(Message.citations))
+        .where(Message.session_id == session_id)
+        .order_by(Message.created_at)
     )
     messages = msg_result.scalars().all()
 
