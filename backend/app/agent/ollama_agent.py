@@ -14,22 +14,21 @@ class OllamaAgent(BaseAgent):
         self.base_url = settings.ollama_base_url.rstrip("/")
         self.model = settings.ollama_model
 
-    def _build_prompt(self, messages: list[dict], system: str) -> str:
-        parts = [f"<|system|>\n{system}\n"]
-        for msg in messages:
-            role = "user" if msg["role"] == "user" else "assistant"
-            parts.append(f"<|{role}|>\n{msg['content']}\n")
-        parts.append("<|assistant|>\n")
-        return "".join(parts)
-
     async def stream(self, messages: list[dict], system: str) -> AsyncIterator[str]:
-        prompt = self._build_prompt(messages, system)
+        # Format messages for Ollama chat API
+        ollama_messages = [{"role": "system", "content": system}]
+        for msg in messages:
+            ollama_messages.append({
+                "role": "user" if msg["role"] == "user" else "assistant",
+                "content": msg["content"]
+            })
+
         try:
             async with httpx.AsyncClient(timeout=TIMEOUT) as client:
                 async with client.stream(
                     "POST",
-                    f"{self.base_url}/api/generate",
-                    json={"model": self.model, "prompt": prompt, "stream": True},
+                    f"{self.base_url}/api/chat",
+                    json={"model": self.model, "messages": ollama_messages, "stream": True},
                 ) as resp:
                     resp.raise_for_status()
                     import json
@@ -37,9 +36,8 @@ class OllamaAgent(BaseAgent):
                         if line:
                             try:
                                 data = json.loads(line)
-                                token = data.get("response", "")
-                                if token:
-                                    yield token
+                                if "message" in data and "content" in data["message"]:
+                                    yield data["message"]["content"]
                                 if data.get("done"):
                                     break
                             except json.JSONDecodeError:
