@@ -4,10 +4,17 @@ import structlog
 from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
+import sys
+import asyncio
+
+# Fix for psycopg on Windows with FastAPI
+if sys.platform == "win32":
+    asyncio.set_event_loop_policy(asyncio.WindowsSelectorEventLoopPolicy())
+
 from app.config import settings
 from app.database import init_db
 from app.logging_config import configure_logging
-from app.routers import chat, sessions, health
+from app.routers import chat, sessions, health, auth
 
 configure_logging()
 logger = structlog.get_logger(__name__)
@@ -58,6 +65,7 @@ async def global_exception_handler(request: Request, exc: Exception):
 
 app.include_router(health.router)
 app.include_router(sessions.router)
+app.include_router(auth.router)
 app.include_router(chat.router)
 
 

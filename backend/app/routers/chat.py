@@ -13,6 +13,8 @@ from app.agent.skills.ship30 import run_ship30_skill
 from app.agent.skills.artifact_gen import run_artifact_skill
 from app.rag.retriever import retriever
 from app.rag.citations import format_context_for_prompt, format_citations_for_display
+from app.routers.auth import get_current_user
+from app.models import User
 from app.config import settings
 from app.logging_config import get_logger
 
@@ -97,15 +99,19 @@ async def _update_session_title(db: AsyncSession, session_id: str, first_message
 
 
 @router.post("/stream")
-async def chat_stream(body: ChatRequest, db: AsyncSession = Depends(get_db)):
+async def chat_stream(
+    body: ChatRequest,
+    user: User = Depends(get_current_user),
+    db: AsyncSession = Depends(get_db)
+):
     request_id = str(uuid.uuid4())
     structlog.contextvars.clear_contextvars()
     structlog.contextvars.bind_contextvars(request_id=request_id, session_id=body.session_id)
 
-    result = await db.execute(select(Session).where(Session.id == body.session_id))
+    result = await db.execute(select(Session).where(Session.id == body.session_id, Session.user_id == user.id))
     session = result.scalar_one_or_none()
     if not session:
-        raise HTTPException(status_code=404, detail="Session not found")
+        raise HTTPException(status_code=404, detail="Session not found or not owned by user")
 
     history = await _build_history(body.session_id, db)
     if not history:
@@ -128,7 +134,7 @@ async def chat_stream(body: ChatRequest, db: AsyncSession = Depends(get_db)):
         try:
             if skill == "ship30":
                 yield f"data: {json.dumps({'type': 'skill_start', 'skill': 'ship30'})}\n\n"
-                essay = await run_ship30_skill(body.message, context)
+                essay = await run_ship30_skill(user, body.message, context)
                 full_response.append(essay)
                 for token in essay:
                     yield f"data: {json.dumps({'type': 'token', 'content': token})}\n\n"
@@ -137,7 +143,7 @@ async def chat_stream(body: ChatRequest, db: AsyncSession = Depends(get_db)):
             elif skill and skill.startswith("artifact:"):
                 artifact_type = skill.split(":")[1] if ":" in skill else "markdown"
                 yield f"data: {json.dumps({'type': 'skill_start', 'skill': 'artifact'})}\n\n"
-                title, art_content = await run_artifact_skill(body.message, artifact_type, context)
+                title, art_content = await run_artifact_skill(user, body.message, artifact_type, context)
                 summary = f"I've generated a {artifact_type.upper()} artifact: **{title}**. You can see it rendered in the panel on the right."
                 full_response.append(summary)
                 for token in summary:
@@ -151,7 +157,7 @@ async def chat_stream(body: ChatRequest, db: AsyncSession = Depends(get_db)):
                         "content": f"{body.message}\n\n<transcript_sources>\n{context}\n</transcript_sources>",
                     }
                 ]
-                agent = get_agent()
+                agent = get_agent(user, session.model_provider, session.model_name)
                 async for token in agent.stream(augmented_messages, CHAT_SYSTEM):
                     full_response.append(token)
                     yield f"data: {json.dumps({'type': 'token', 'content': token})}\n\n"

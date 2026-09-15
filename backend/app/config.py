@@ -3,10 +3,9 @@ from typing import Literal
 
 
 class Settings(BaseSettings):
-    llm_provider: Literal["groq", "ollama"] = "groq"
+    llm_provider: Literal["claude", "ollama"] = "claude"
 
-    groq_api_key: str = ""
-    groq_model: str = "qwen/qwen3.8-27b"
+    claude_model: str = "claude-3-5-sonnet-20240620"
 
     ollama_base_url: str = "http://localhost:11434"
     ollama_model: str = "llama3.2:3b"

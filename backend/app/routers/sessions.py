@@ -1,11 +1,12 @@
 import uuid
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends, HTTPException, Query
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select, desc
 from app.database import get_db
-from app.models import Session, Message
+from app.models import Session, Message, User
 from app.schemas import SessionCreate, SessionOut, SessionWithMessages, MessageOut, ArtifactOut, CitationOut
 from app.config import settings
+from app.routers.auth import get_current_user
 from app.logging_config import get_logger
 
 router = APIRouter(prefix="/sessions", tags=["sessions"])
@@ -13,10 +14,15 @@ logger = get_logger(__name__)
 
 
 @router.post("", response_model=SessionOut, status_code=201)
-async def create_session(body: SessionCreate, db: AsyncSession = Depends(get_db)):
+async def create_session(
+    body: SessionCreate,
+    user: User = Depends(get_current_user),
+    db: AsyncSession = Depends(get_db)
+):
     session = Session(
         id=str(uuid.uuid4()),
         title=body.title,
+        user_id=user.id,
         model_provider=settings.llm_provider,
         model_name=settings.groq_model if settings.llm_provider == "groq" else settings.ollama_model,
     )
@@ -28,14 +34,31 @@ async def create_session(body: SessionCreate, db: AsyncSession = Depends(get_db)
 
 
 @router.get("", response_model=list[SessionOut])
-async def list_sessions(db: AsyncSession = Depends(get_db)):
-    result = await db.execute(select(Session).order_by(desc(Session.updated_at)))
+async def list_sessions(
+    limit: int = Query(50, le=100),
+    offset: int = 0,
+    user: User = Depends(get_current_user),
+    db: AsyncSession = Depends(get_db)
+):
+    result = await db.execute(
+        select(Session)
+        .where(Session.user_id == user.id)
+        .order_by(desc(Session.updated_at))
+        .limit(limit)
+        .offset(offset)
+    )
     return result.scalars().all()
 
 
 @router.get("/{session_id}", response_model=SessionWithMessages)
-async def get_session(session_id: str, db: AsyncSession = Depends(get_db)):
-    result = await db.execute(select(Session).where(Session.id == session_id))
+async def get_session(
+    session_id: str,
+    user: User = Depends(get_current_user),
+    db: AsyncSession = Depends(get_db)
+):
+    result = await db.execute(
+        select(Session).where(Session.id == session_id, Session.user_id == user.id)
+    )
     session = result.scalar_one_or_none()
     if not session:
         raise HTTPException(status_code=404, detail="Session not found")
