@@ -1,7 +1,7 @@
 from fastapi import APIRouter
 from sqlalchemy import text
 from app.database import engine
-from app.agent.router import get_agent
+from app.agent.ollama_agent import OllamaAgent
 from app.rag.retriever import retriever
 from app.schemas import HealthResponse
 from app.config import settings
@@ -29,20 +29,20 @@ async def health():
     except Exception as exc:
         checks["chromadb"] = f"error: {exc}"
 
-    agent = get_agent()
+    agent = OllamaAgent()
     try:
         available = await agent.is_available()
-        checks["llm"] = "ok" if available else "unavailable"
+        checks["llm"] = "ok" if available else "unavailable (Ollama fallback)"
     except Exception as exc:
         checks["llm"] = f"error: {exc}"
 
     overall = "ok" if all("error" not in v and "unavailable" not in v for v in checks.values()) else "degraded"
 
-    model = settings.groq_model if settings.llm_provider == "groq" else settings.ollama_model
+    # Default to claude in health check reporting, since it's the primary now
     return HealthResponse(
         status=overall,
         version=settings.app_version,
-        provider=settings.llm_provider,
-        model=model,
+        provider="claude",
+        model="claude-3-5-sonnet-20240620",
         checks=checks,
     )

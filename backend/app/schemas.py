@@ -76,3 +76,24 @@ class ErrorResponse(BaseModel):
     error: str
     detail: str | None = None
     request_id: str | None = None
+
+class UserCreate(BaseModel):
+    email: str
+    password: str
+
+class UserLogin(BaseModel):
+    email: str
+    password: str
+
+class UserOut(BaseModel):
+    id: str
+    email: str
+    claude_api_key: str | None = None
+    openai_api_key: str | None = None
+
+    class Config:
+        from_attributes = True
+
+class SettingsUpdate(BaseModel):
+    claude_api_key: str | None = None
+    openai_api_key: str | None = None
